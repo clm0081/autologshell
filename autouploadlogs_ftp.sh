@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ##########################
-######made by roman######
-######       version 2.1   ######
+##         made by roman         ##
+##      version 2.2_ftp ver      ##
 ##########################
 
 hostipaddr=127.0.0.1
@@ -29,7 +29,7 @@ logsready=0
 function makexmls()
 {
     logsname=`basename $1 .log`
-    echo "<?xml version="1.0" encoding="GB2312"?><BOSS_AUDIT xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="审计文件格式.xsd">" > $workdirectory/xmls/$logsname.xml
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><BOSS_AUDIT xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"审计文件格式.xsd\">" > $workdirectory/xmls/$logsname.xml
     cat $1 >>  $workdirectory/xmls/$logsname.xml
     echo "</BOSS_AUDIT>" >>  $workdirectory/xmls/$logsname.xml
     zip -j $workdirectory/xmls/$logsname.zip $workdirectory/xmls/$logsname.xml
@@ -38,20 +38,22 @@ function makexmls()
 }
 #生成xml以及zip和md5文件的功能模块
 
-lftp <<!
-open sftp://$ftpipaddr
+ftp -n<<!
+open $ftpipaddr
 user $ftpusername $ftppassword
+binary
 cd $ftpkeydirectory
 lcd $workdirectory/faileds
+prompt
 mget *$hostipaddr*.key
-mrm *$hostipaddr*.key
+mdelete *$hostipaddr*.key
 close
 bye
 !
 #获取上传失败的key
 
 for f in $(find $workdirectory/faileds/*.key -type f); do if [ `expr $(basename $f|cut -b 9-10) \* 60 \+ $(basename $f|cut -b 11-12) \+ 45` -ge `expr $(date "+%H") \* 60 \+ $(date "+%M")` ]; then cp $workdirectory/backuplogs/`basename $f .key`.log $workdirectory/logs; logsready=1; fi; done
-for l in $(find $logsdirectory/*/bossLog.* -type f); do mv $l $workdirectory/logs/`date "+%Y%m%d%H%M%S"`$((`date "+%N"`/1000000))"_"$hostipaddr"_"$node.log; logsready=1; done
+for l in $(find $logsdirectory/*/bossLog.* -type f); do if [ -s $1 ]; then mv $l $workdirectory/logs/`date "+%Y%m%d%H%M%S"`$((`date "+%N"`/1000000))"_"$hostipaddr"_"$node.log; logsready=1; fi; done
 if [ "$logsready" = 0 ]; then exit; fi
 #检测是否存在log文件，不存在则推出脚本
 
@@ -60,11 +62,13 @@ for m in $(find $workdirectory/logs/*.log -type f); do
 done
 #搜寻并将log目录下的所有log文件转化为xml格式
 
-lftp <<!
-open sftp://$ftpipaddr
+ftp -n<<!
+open $ftpipaddr
 user $ftpusername $ftppassword
+binary
 cd $ftpdirectory
 lcd $workdirectory/xmls
+prompt
 mput *
 close
 bye
