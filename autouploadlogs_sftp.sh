@@ -2,7 +2,7 @@
 
 ##########################
 ##         made by roman          ##
-##      version 2.2_sftp ver     ##
+##      version 2.3_sftp ver     ##
 ##########################
 
 hostipaddr=127.0.0.1
@@ -51,7 +51,7 @@ bye
 #获取上传失败的key
 
 for f in $(find $workdirectory/faileds/*.key -type f); do if [ `expr $(basename $f|cut -b 9-10) \* 60 \+ $(basename $f|cut -b 11-12) \+ 45` -ge `expr $(date "+%H") \* 60 \+ $(date "+%M")` ]; then cp $workdirectory/backuplogs/`basename $f .key`.log $workdirectory/logs; logsready=1; fi; done
-for l in $(find $logsdirectory/*/bossLog.* -type f); do if [ -s $1 ]; then mv $l $workdirectory/logs/`date "+%Y%m%d%H%M%S"`$((`date "+%N"`/1000000))"_"$hostipaddr"_"$node.log; logsready=1; else rm -f $1; fi; done
+for l in $(find $logsdirectory/*/bossLog.* -type f); do if [ -s $l ]; then mv $l $workdirectory/logs/`date "+%Y%m%d%H%M%S"`$((10#`date "+%N"`/1000000))"_"$hostipaddr"_"$node.log; logsready=1; else rm -f $l; fi; done
 if [ "$logsready" = 0 ]; then exit; fi
 #检测是否存在log文件，不存在则推出脚本
 

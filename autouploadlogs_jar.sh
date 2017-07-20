@@ -2,7 +2,7 @@
 
 ##########################
 ##         made by roman         ##
-##      version 2.3_ftp ver      ##
+##      version 2.3_jar ver      ##
 ##########################
 
 hostipaddr=127.0.0.1
@@ -38,18 +38,8 @@ function makexmls()
 }
 #生成xml以及zip和md5文件的功能模块
 
-ftp -n<<!
-open $ftpipaddr
-user $ftpusername $ftppassword
-binary
-cd $ftpkeydirectory
-lcd $workdirectory/faileds
-prompt
-mget *$hostipaddr*.key
-mdelete *$hostipaddr*.key
-close
-bye
-!
+java -jar ./javaSftp.jar com.transfar.sftp.SFTPDownLoad "$ftpipaddr" "$ftpusername" "$ftppassword" "$workdirectory/faileds" "$ftpkeydirectory" "$hostipaddr"
+
 #获取上传失败的key
 
 for f in $(find $workdirectory/faileds/*.key -type f); do if [ `expr $(basename $f|cut -b 9-10) \* 60 \+ $(basename $f|cut -b 11-12) \+ 45` -ge `expr $(date "+%H") \* 60 \+ $(date "+%M")` ]; then cp $workdirectory/backuplogs/`basename $f .key`.log $workdirectory/logs; logsready=1; fi; done
@@ -62,17 +52,8 @@ for m in $(find $workdirectory/logs/*.log -type f); do
 done
 #搜寻并将log目录下的所有log文件转化为xml格式
 
-ftp -n<<!
-open $ftpipaddr
-user $ftpusername $ftppassword
-binary
-cd $ftpdirectory
-lcd $workdirectory/xmls
-prompt
-mput *
-close
-bye
-!
+java -jar ./javaSftp.jar com.transfar.sftp.SFTPUpload "$ftpipaddr" "$ftpusername" "$ftppassword" "$workdirectory/xmls" "$ftpdirectory"
+
 #将转化好的文件上传至ftp服务器上
 
 mv $workdirectory/logs/* $workdirectory/backuplogs
