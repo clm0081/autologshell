@@ -1,10 +1,10 @@
-#AutoUpdateLog Shell
+# AutoUpdateLog Shell
 
 这是一个用来自动将服务器上指定Log文件格式化并打包、生成压缩包md5值的自动化脚本。
   
 支持将log文件以及md5文件上传，并根据服务器上指定文件夹中的错误文件样本，重新打包并上传该文件。
   
-##update log
+## update log
 
 * v2.3: 修正一个由8进制导致的逻辑错误，并增加java版。
 
